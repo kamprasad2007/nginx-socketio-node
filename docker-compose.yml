@@ -1,0 +1,63 @@
+version: '3.0'
+services:
+  server:
+    container_name: service
+    build:
+      context: ./service
+      dockerfile: Dockerfile
+    image: service:dev
+    deploy:
+      resources: # Set these values when you know what you do!
+        limits:
+          cpus: '0.001'
+          memory: 50M
+        reservations:
+          cpus: '0.0001'
+          memory: 20M
+    ports:
+      - '8000:8000'
+    links:
+      - app:app
+      - socket:socket
+    depends_on:
+      - "app"
+      - "socket"
+  socket:
+    container_name: socket
+    build:
+      context: ./socket
+      dockerfile: Dockerfile
+    deploy:
+      resources: # Set these values when you know what you do!
+        limits:
+          cpus: '0.001'
+          memory: 50M
+        reservations:
+          cpus: '0.0001'
+          memory: 20M
+    image: socket:dev
+    volumes:
+      - ./socket:/socket
+    ports:
+      - '8090:8090'
+    command: node server.js
+    restart: unless-stopped
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    deploy:
+      resources: # Set these values when you know what you do!
+        limits:
+          cpus: '0.001'
+          memory: 50M
+        reservations:
+          cpus: '0.0001'
+          memory: 20M
+    image: app:dev
+    volumes:
+      - ./app:/app
+    ports:
+      - '8080:8080'
+    command: node app.js
